@@ -112,12 +112,18 @@ class RocketLeagueEnv(gym.Env):
             self._opp: np.array([self._opponent_action()]),
         }
         obs, rewards, terminated, truncated = self._rlgym.step(actions)
+        state = self._rlgym.state
+        info = {
+            "touched": bool(state.cars[self._me].ball_touches > 0),
+            "goal_for": bool(state.goal_scored and state.scoring_team == BLUE_TEAM),
+            "goal_against": bool(state.goal_scored and state.scoring_team != BLUE_TEAM),
+        }
         return (
             obs[self._me].astype(np.float32),
             float(rewards[self._me]),
             bool(terminated[self._me]),
             bool(truncated[self._me]),
-            {},
+            info,
         )
 
     def close(self):
